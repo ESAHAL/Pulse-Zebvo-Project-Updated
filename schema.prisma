@@ -1,0 +1,58 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String      @id @default(cuid())
+  name       String?
+  email      String      @unique
+  password   String
+  image      String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  workspaces Workspace[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id          String    @id @default(cuid())
+  name        String
+  brandName   String?
+  brandVoice  String?
+  industry    String?
+  description String?
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contents    Content[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("workspaces")
+}
+
+model Content {
+  id            String    @id @default(cuid())
+  platform      String    // "instagram" | "twitter" | "linkedin" | "facebook" | "tiktok"
+  tone          String    // "professional" | "casual" | "humorous" | "inspirational" | "bold"
+  prompt        String
+  generatedText String?
+  imageUrl      String?
+  imagePrompt   String?
+  hashtags      String?   // JSON string array
+  scheduledDate DateTime?
+  status        String    @default("draft") // "draft" | "scheduled" | "published"
+  workspaceId   String
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("contents")
+}
